@@ -2,6 +2,7 @@ import datetime
 import csv
 import logging
 import pandas as pd
+from prettytable import PrettyTable
 
 
 logging.basicConfig(filename='todo_app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -59,6 +60,8 @@ class Task:
             "due_date": str(self.due_date),
             "completed": self.completed
         }
+        
+        
     def determine_due_status(self):
         """
         Determines the due status of the task based on its due date.
@@ -66,7 +69,7 @@ class Task:
         Returns:
             str: Due status of the task.
         """
-        today = pd.Timestamp.now().strftime('%Y-%m-%d')
+        today = pd.Timestamp.now().date()
         if self.due_date == today:
             return 'Due today'
         elif self.due_date > today:
@@ -156,35 +159,45 @@ class TaskManager:
     
     def save_to_csv(self, filename="tasks.csv"):
         '''
-        Saves tasks to a CSV file.
+        Saves tasks to a CSV file in the format "description,due_date,completed,determine_due_status".
 
         Args:
             filename (str, optional): Name of the CSV file. Defaults to "tasks.csv".
         '''
         with open(filename, mode='w', newline='') as file:
-            fieldnames = ["description", "due_date", "completed"]
+            fieldnames = ["description", "due_date", "completed", "due_status"]
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             for task in self.tasks:
-                writer.writerow(task.to_dict())
+                task_dict = task.to_dict()
+                task_dict["due_status"] = task.determine_due_status()
+                writer.writerow(task_dict)
+
 
     def load_from_csv(self, filename="tasks.csv"):
         '''
-        Loads tasks from a CSV file.
+        Loads tasks from a CSV file and returns a list of Task objects.
 
         Args:
             filename (str, optional): Name of the CSV file. Defaults to "tasks.csv".
+
+        Returns:
+            list: List of Task objects loaded from the CSV file.
         '''
+        tasks = []
         try:
             with open(filename, mode='r') as file:
                 reader = csv.DictReader(file)
                 for row in reader:
                     due_date = datetime.datetime.strptime(row['due_date'], "%Y-%m-%d").date() if row['due_date'] else None
-                    task = Task(row['description'], due_date, eval(row['completed']))
-                    self.add_task(task)
-            print("Tasks loaded successfully!")
+                    completed = eval(row['completed'])
+                    task = Task(row['description'], due_date, completed)
+                    tasks.append(task)
+                print("Tasks loaded successfully!")
         except FileNotFoundError:
             print("No tasks found.")
+        return tasks
+
             
 def get_due_date_from_user():
     '''
@@ -243,7 +256,7 @@ def main():
     Main function to run the task management application.
     '''
     task_manager = TaskManager()
-    task_manager.tasks = load_tasks_from_csv()   # Load tasks from CSV file at startup
+    task_manager.tasks = load_tasks_from_csv()
     
     while True:
         print("\nMenu:")
@@ -252,8 +265,8 @@ def main():
         print("3. Mark Task as Pending")
         print("4. Delete Task")
         print("5. View Tasks")
-        print("6. Undo")
-        print("7. Exit")
+        # print("6. Undo")
+        print("6. Exit")
         
         choice = get_user_choice()
 
@@ -262,27 +275,27 @@ def main():
             due_date = get_due_date_from_user()
             task = Task(description, due_date)
             task_manager.add_task(task)
-            task_manager.save_to_csv()  # Save tasks to CSV after adding a task
+            task_manager.save_to_csv() 
             print("Task added successfully!")
 
         elif choice == 2:
             task_description = input("Enter task description to mark as completed: ")
             task_manager.mark_task_as_completed(task_description)
-            task_manager.save_to_csv()  # Save tasks to CSV after marking as completed
+            task_manager.save_to_csv()
             print("Task marked as completed.")
             logging.info(f"Task '{task_description}' marked as completed.")
 
         elif choice == 3:
             task_description = input("Enter task description to mark as pending: ")
             task_manager.mark_task_as_pending(task_description)
-            task_manager.save_to_csv()  # Save tasks to CSV after marking as pending
+            task_manager.save_to_csv()
             print("Task marked as pending.")
             logging.info(f"Task '{task_description}' marked as pending.")
 
         elif choice == 4:
             task_description = input("Enter task description to delete: ")
             task_manager.delete_task(task_description)
-            task_manager.save_to_csv()  # Save tasks to CSV after deletion
+            task_manager.save_to_csv()
             print("Task deleted successfully.")
             logging.info(f"Task '{task_description}' deleted.")
 
@@ -298,17 +311,28 @@ def main():
             else:
                 print("Invalid filter type. Showing all tasks.")
                 tasks = task_manager.tasks
-            
+
+            table = PrettyTable(["Description", "Due Date", "Completed", "Due Status"])
+            table.align["Description"] = "l"
+            table.align["Due Date"] = "c"
+            table.align["Completed"] = "c"
+            table.align["Due Status"] = "c"
+
             for task in tasks:
-                print(task)
+                table.add_row([task.description, task.due_date, task.completed, task.determine_due_status()])
 
+            print(table)
+
+
+        # elif choice == 6:
+        #     if caretaker.undo(task_manager):
+        #         print("Undo successful!")
+        #     else:
+        #         print("Unable to undo.")
+        
         elif choice == 6:
-            print("Undo functionality not implemented.")
-            # Implement undo functionality if required
-
-        elif choice == 7:
             print("Exiting...")
-            task_manager.save_to_csv()  # Save tasks to CSV file before exiting
+            task_manager.save_to_csv()
             break
 
 if __name__ == "__main__":
