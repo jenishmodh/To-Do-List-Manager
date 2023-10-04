@@ -1,6 +1,9 @@
 import datetime
 import csv
 import logging
+import pandas as pd
+
+
 logging.basicConfig(filename='todo_app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class Task:
@@ -56,7 +59,22 @@ class Task:
             "due_date": str(self.due_date),
             "completed": self.completed
         }
-    
+    def determine_due_status(self):
+        """
+        Determines the due status of the task based on its due date.
+
+        Returns:
+            str: Due status of the task.
+        """
+        today = pd.Timestamp.now().strftime('%Y-%m-%d')
+        if self.due_date == today:
+            return 'Due today'
+        elif self.due_date > today:
+            return 'On time'
+        elif self.due_date < today:
+            return 'Past due'
+        
+        
     def __str__(self):
         '''
         String representation of the task.
@@ -64,9 +82,9 @@ class Task:
         Returns:
             str: Formatted task description with status and due date (if available).
         '''
-        status = "Completed" if self.completed else "Pending"
-        due_date_str = f", Due: {self.due_date}" if self.due_date else ""
-        return f"{self.description} - {status}{due_date_str}"
+        status = self.determine_due_status()
+        status_str = f", {status}" if status else ""
+        return f"{self.description} - {status}{status_str}"
 
 class TaskManager:
     '''
