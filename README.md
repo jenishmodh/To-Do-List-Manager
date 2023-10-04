@@ -21,7 +21,7 @@ cd To-Do-List-Manager-main
 
 2.Run the Application:
 ```sh
-python main.py
+python todo.py
 ```
 3.Follow the Menu:
 
