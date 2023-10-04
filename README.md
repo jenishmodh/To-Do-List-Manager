@@ -16,7 +16,7 @@ To-Do-List-Manager is a lightweight and efficient Python command-line applicatio
 
 https://github.com/jenishmodh/To-Do-List-Manager.git
 ```sh
-cd task-manager
+cd To-Do-List-Manager-main
 ```
 
 2.Run the Application:
