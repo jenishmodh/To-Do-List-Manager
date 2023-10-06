@@ -18,7 +18,6 @@ def main():
         print("3. Mark Task as Pending")
         print("4. Delete Task")
         print("5. View Tasks")
-        # print("6. Extend Deadline")
         print("6. undo/redo")
         print("7. Modify task")
         print("8. Exit")
@@ -86,22 +85,7 @@ def main():
                 table.add_row([task.description, task.due_date, task.completed, task.determine_due_status()])
 
             print(table)
-
-
-        # elif choice == 6:
-        #     task_description = input("Enter task description to modify the due date: ")
-        #     for task in task_manager.tasks:
-        #         if task.description == task_description:
-        #             new_due_date = input_handler.get_due_date_from_user()
-        #             task.set_due_date(new_due_date)
-        #             utils.save_to_csv(task_manager.tasks)
-        #             print(f"Due date of task '{task_description}' modified successfully.")
-        #             logging.info(f"Due date of task '{task_description}' modified to {new_due_date}.")
-        #             break
-        #     else:
-        #         print(f"Task with description '{task_description}' not found.")
-        #         logging.error(f"Task with description '{task_description}' not found.")
-                
+            
         elif choice == 6:
             print("Undo or Redo? (undo/redo)")
             action = input().lower()
