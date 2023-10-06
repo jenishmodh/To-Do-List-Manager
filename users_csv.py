@@ -17,10 +17,10 @@ class InputHandler:
         '''
         while True:
             choice = input("Enter your choice: ")
-            if choice.isdigit() and 1 <= int(choice) <= 7:
+            if choice.isdigit() and 1 <= int(choice) <= 8:
                 return int(choice)
             else:
-                print("Invalid choice. Please enter a number between 1 and 7.")
+                print("Invalid choice. Please enter a number between 1 and 8.")
 
     def get_due_date_from_user(self):
         '''

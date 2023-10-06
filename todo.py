@@ -18,8 +18,10 @@ def main():
         print("3. Mark Task as Pending")
         print("4. Delete Task")
         print("5. View Tasks")
-        print("6. Extend Deadline")
-        print("7. Exit")
+        # print("6. Extend Deadline")
+        print("6. undo/redo")
+        print("7. Modify task")
+        print("8. Exit")
         
         choice = input_handler.get_user_choice()
         
@@ -86,21 +88,71 @@ def main():
             print(table)
 
 
+        # elif choice == 6:
+        #     task_description = input("Enter task description to modify the due date: ")
+        #     for task in task_manager.tasks:
+        #         if task.description == task_description:
+        #             new_due_date = input_handler.get_due_date_from_user()
+        #             task.set_due_date(new_due_date)
+        #             utils.save_to_csv(task_manager.tasks)
+        #             print(f"Due date of task '{task_description}' modified successfully.")
+        #             logging.info(f"Due date of task '{task_description}' modified to {new_due_date}.")
+        #             break
+        #     else:
+        #         print(f"Task with description '{task_description}' not found.")
+        #         logging.error(f"Task with description '{task_description}' not found.")
+                
         elif choice == 6:
-            task_description = input("Enter task description to modify the due date: ")
-            for task in task_manager.tasks:
-                if task.description == task_description:
-                    new_due_date = input_handler.get_due_date_from_user()
-                    task.set_due_date(new_due_date)
-                    utils.save_to_csv(task_manager.tasks)
-                    print(f"Due date of task '{task_description}' modified successfully.")
-                    logging.info(f"Due date of task '{task_description}' modified to {new_due_date}.")
-                    break
+            print("Undo or Redo? (undo/redo)")
+            action = input().lower()
+            if action == "undo":
+                if task_manager.undo():
+                    print("Undo successful!")
+                else:
+                    print("Unable to undo.")
+            elif action == "redo":
+                if task_manager.redo():
+                    print("Redo successful!")
+                else:
+                    print("Unable to redo.")
             else:
-                print(f"Task with description '{task_description}' not found.")
-                logging.error(f"Task with description '{task_description}' not found.")
+                print("Invalid command.")
                 
         elif choice == 7:
+            task_description = input("Enter task description to modify: ")
+            for task in task_manager.tasks:
+                if task.description == task_description:
+                    print("1. Modify Description")
+                    print("2. Modify Due Date")
+                    print("3. Mark as Completed")
+                    print("4. Mark as Pending")
+                    print("5. Back to Main Menu")
+                    modify_choice = input("Enter your modification choice: ")
+
+                    if modify_choice == "1":
+                        new_description = input("Enter new description: ")
+                        task.description = new_description
+                    elif modify_choice == "2":
+                        new_due_date = input_handler.get_due_date_from_user()
+                        task.set_due_date(new_due_date)
+                    elif modify_choice == "3":
+                        task.mark_as_completed()
+                    elif modify_choice == "4":
+                        task.mark_as_pending()
+                    elif modify_choice == "5":
+                        break 
+                    else:
+                        print("Invalid modification choice. Please try again.")
+                    
+                    utils.save_to_csv(task_manager.tasks)
+                    print(f"Task '{task_description}' modified successfully.")
+                    logging.info(f"Task '{task_description}' modified.")
+                    break
+                else:
+                    print(f"Task with description '{task_description}' not found.")
+                    logging.error(f"Task with description '{task_description}' not found.")
+                    
+        elif choice == 8:
             print("Exiting...")
             utils.save_to_csv(task_manager.tasks)
             break

@@ -40,3 +40,5 @@ def load_from_csv(filename="tasks.csv") -> list:
         print("No tasks found.")
     return tasks
 
+
+

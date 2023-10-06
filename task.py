@@ -12,6 +12,7 @@ class TaskManager:
         Initializes an empty TaskManager object.
         '''
         self.tasks = []
+        self.caretaker = Caretaker()
 
     def add_task(self, task):
         '''
@@ -70,6 +71,35 @@ class TaskManager:
         else:
             filtered_tasks = self.tasks
         return filtered_tasks
+    
+
+    def undo(self):
+        '''
+        Undo the last action performed by restoring the previous state.
+        
+        Returns:
+            bool: True if undo was successful, False otherwise.
+    '''
+        if len(self.caretaker.mementos) > 1:
+            memento = self.caretaker.get_memento(-2)
+            self.tasks[-1].restore_from_memento(memento)
+            self.caretaker.add_memento(memento)
+            return True
+        return False
+
+    def redo(self):
+        '''
+    Redo the last undone action by restoring the next state.
+    
+    Returns:
+        bool: True if redo was successful, False otherwise.
+    '''
+        if len(self.caretaker.mementos) > 1:
+            memento = self.caretaker.get_memento(1)
+            self.tasks[-1].restore_from_memento(memento)
+            self.caretaker.add_memento(memento)
+            return True
+        return False
 
 
 class Task:
@@ -143,6 +173,16 @@ class Task:
             return 'Past due'
         
         
+    def create_memento(self):
+            return TaskMemento(self.description, self.due_date, self.completed)
+
+    def restore_from_memento(self, memento):
+        self.description = memento.description
+        self.due_date = memento.due_date
+        self.completed = memento.completed
+        
+        
+        
     def __str__(self):
         '''
         String representation of the task.
@@ -153,3 +193,21 @@ class Task:
         status = self.determine_due_status()
         status_str = f", {status}" if status else ""
         return f"{self.description} - {status}{status_str}"
+
+class TaskMemento:
+    def __init__(self, description, due_date, completed):
+        self.description = description
+        self.due_date = due_date
+        self.completed = completed
+        
+
+class Caretaker:
+    def __init__(self):
+        self.mementos = []
+
+    def add_memento(self, memento):
+        self.mementos.append(memento)
+
+    def get_memento(self, index):
+        return self.mementos[index]
+
